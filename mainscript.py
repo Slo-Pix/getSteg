@@ -12,7 +12,10 @@ def encrypt(type, input_file, output_file, key, message, parser, hidden_file):
         else:
             parser.error("PDF requires -k option")
     elif type =="image":
-        Imagesteg.encrypt(input_file=input_file, message=message, output_file=output_file)
+        if hidden_file:
+            Imagesteg.encrypt_file(input_file=input_file, hidden_file=hidden_file, output_file=output_file)
+        else:
+            Imagesteg.encrypt(input_file=input_file, message=message, output_file=output_file)
     elif type =="audio":
         audioSteg.encrypt(input_file=input_file, message=message, output_file=output_file)
     else:
@@ -22,11 +25,15 @@ def encrypt(type, input_file, output_file, key, message, parser, hidden_file):
 def decrypt(type, input_file, parser, output_file, key):
     if type=="pdf" and key and output_file:
         PdfSteg.decrypt_file(input_file=input_file, output_file=output_file, key=key)
-        
     elif type=="pdf":
         PdfSteg.decrypt(pdf_path=input_file)
+
     elif type=="image":
-        Imagesteg.decrypt(input_file=input_file)
+        if output_file:
+            Imagesteg.decrypt_file(input_file=input_file, output_file=output_file)
+        else:
+            Imagesteg.decrypt(input_file=input_file)
+
     elif type=="audio":
         audioSteg.decrypt(input_file=input_file)
     else:

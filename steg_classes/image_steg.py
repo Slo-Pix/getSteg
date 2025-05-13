@@ -56,6 +56,23 @@ def decrypt_character_from_pixel_group(pixel_list):
     return character, continue_flag
 
 
+def decrypt_binary_list_from_pixel_group(pixel_list):
+    binary_string=''
+    continue_flag=''
+    index=0
+    for pixel in pixel_list:
+        for color in pixel:
+            color_list = list(convert_int2bin(color))
+            if index != 8:
+                binary_string+=color_list[-1] 
+                index=index+1
+            else:
+                continue_flag=color_list[-1]
+    
+    return binary_string, continue_flag
+
+
+
 
 def perform_lsb_steg(new_img, binary_list):
     pixels = new_img.getdata()
@@ -75,11 +92,63 @@ def perform_lsb_steg(new_img, binary_list):
         pixel_index=(i+1)+pixel_index 
         yield(new_pixels)
      
+
+
+def save_file(binary_str, output_file):
+    try:
+        if len(binary_str) % 8 != 0:
+            raise ValueError("Binary string length must be 8")
+        
+        byte_chunks=[]
+        for i in range(0, len(binary_str), 8):
+            byte_chunks.append(binary_str[i:i+8])
+
+        byte_list=[]
+        for byte_chunk in byte_chunks:
+            byte_value=int(byte_chunk,2)
+            byte_list.append(byte_value)
+        
+        byte_list=bytes(byte_list)
+        with open(output_file, 'wb') as file:
+            file.write(byte_list)
+
+    except Exception as e:
+        print(f"An error occured : {e}")
+
+
 class Imagesteg:
 
     def encrypt(input_file, message, output_file):
         binary_list=convert_messg2bin(message)
         print("\nEncrypt Successful...")    
+
+        image=Image.open(input_file)
+        if image.mode != 'RGB':
+            image=image.convert('RGB')
+        
+        width, height=image.size
+        new_img=image.copy()
+        
+        curr_x=0
+        curr_y=0
+        for pixel_list in perform_lsb_steg(new_img=new_img, binary_list=binary_list):
+            for pixel in pixel_list:
+                new_img.putpixel((curr_x,curr_y), pixel)
+                if curr_x == width:
+                    curr_x=0
+                    curr_y=curr_y+1
+                else:
+                    curr_x=curr_x+1
+        new_img.save(output_file)   
+
+
+    def encrypt_file(input_file, hidden_file, output_file):
+        binary_list=[]
+
+        with open(hidden_file, 'rb') as hf:
+            file_bytes=hf.read()
+            for byte in file_bytes:
+                binary_list.append(format(byte, '08b'))
 
         image=Image.open(input_file)
         if image.mode != 'RGB':
@@ -112,3 +181,16 @@ class Imagesteg:
             if continue_flag=='1':
                 break
         print(f"\n{message}")
+
+
+    def decrypt_file(input_file, output_file):
+        image=Image.open(input_file)
+        pixels=list(image.getdata())
+        GRP_SIZE=3
+        message=''
+        for index in range(0,len(pixels), GRP_SIZE):
+            binary_string, continue_flag=decrypt_binary_list_from_pixel_group(pixels[index : index+GRP_SIZE])
+            message=message+binary_string
+            if continue_flag=='1':
+                break
+        save_file(binary_str=message, output_file=output_file)
