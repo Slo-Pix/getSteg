@@ -1,0 +1,3 @@
+- check max size for files and messages that can be uploaded
+- allow entering multiple keys
+- qr code stego 

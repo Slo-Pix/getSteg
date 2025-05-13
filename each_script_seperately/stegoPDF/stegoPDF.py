@@ -52,8 +52,3 @@ def main():
 if __name__ == "__main__":
     main()
 
-
-# can only enter one key for now
-# file path check select a pdf file error
-# qr code 
-# image and audio
