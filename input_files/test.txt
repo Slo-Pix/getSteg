@@ -1,0 +1,4 @@
+this is a test file for the script 
+1)trying to see if it can saved into a pdf file metadata
+2)trying to see if it can saved into a .png image
+3)trying to see if it can saved into a .wav audio
