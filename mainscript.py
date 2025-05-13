@@ -11,13 +11,19 @@ def encrypt(type, input_file, output_file, key, message, parser, hidden_file):
             PdfSteg.encrypt_file(input_file=input_file,  key=key, hidden_file=hidden_file, output_file=output_file)
         else:
             parser.error("PDF requires -k option")
+
     elif type =="image":
         if hidden_file:
             Imagesteg.encrypt_file(input_file=input_file, hidden_file=hidden_file, output_file=output_file)
         else:
             Imagesteg.encrypt(input_file=input_file, message=message, output_file=output_file)
+
     elif type =="audio":
-        audioSteg.encrypt(input_file=input_file, message=message, output_file=output_file)
+        if hidden_file:
+            audioSteg.encrypt_file(input_file=input_file, hidden_file=hidden_file, output_file=output_file)
+        else:
+            audioSteg.encrypt(input_file=input_file, message=message, output_file=output_file)
+
     else:
         parser.error("Accepted inputs for -t include image, pdf and audio")
 
@@ -35,7 +41,10 @@ def decrypt(type, input_file, parser, output_file, key):
             Imagesteg.decrypt(input_file=input_file)
 
     elif type=="audio":
-        audioSteg.decrypt(input_file=input_file)
+        if output_file:
+            audioSteg.decrypt_file(input_file=input_file, output_file=output_file)
+        else:
+            audioSteg.decrypt(input_file=input_file)
     else:
         parser.error("Accepted inputs for -t include image, pdf and audio")
         
